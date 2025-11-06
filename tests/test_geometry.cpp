@@ -1,11 +1,12 @@
 #include <gtest/gtest.h>
+
 #include <cmath>
-#include <sstream>
+#include <stdexcept>
 
 #include "figure_vector.hpp"
 #include "point.hpp"
 #include "rectangle.hpp"
-#include "square.hpp"
+#include "rhombus.hpp"
 #include "trapezoid.hpp"
 
 using namespace geometry;
@@ -64,48 +65,48 @@ TEST(PointEdgeCases, ZeroCoordinates) {
   EXPECT_EQ(p.y, 0);
 }
 
-class SquareTest : public ::testing::Test {
+class RhombusTest : public ::testing::Test {
  protected:
-  Square<int> sq1{Point<int>(0, 0), Point<int>(2, 0), Point<int>(2, 2), Point<int>(0, 2)};
-  Square<int> sq2{Point<int>(0, 0), Point<int>(2, 0), Point<int>(2, 2), Point<int>(0, 2)};
-  Square<int> sq3{Point<int>(1, 1), Point<int>(3, 1), Point<int>(3, 3), Point<int>(1, 3)};
+  Rhombus<int> rh1{Point<int>(0, 2), Point<int>(2, 0), Point<int>(0, -2), Point<int>(-2, 0)};
+  Rhombus<int> rh2{Point<int>(0, 2), Point<int>(2, 0), Point<int>(0, -2), Point<int>(-2, 0)};
+  Rhombus<int> rh3{Point<int>(1, 3), Point<int>(3, 1), Point<int>(1, -1), Point<int>(-1, 1)};
 };
 
-TEST_F(SquareTest, GetVertexCount) {
-  EXPECT_EQ(sq1.GetVertexCount(), 4);
+TEST_F(RhombusTest, GetVertexCount) {
+  EXPECT_EQ(rh1.GetVertexCount(), 4);
 }
 
-TEST_F(SquareTest, GetArea) {
-  double area = static_cast<double>(sq1);
-  EXPECT_DOUBLE_EQ(area, 4.0);
+TEST_F(RhombusTest, GetArea) {
+  double area = static_cast<double>(rh1);
+  EXPECT_DOUBLE_EQ(area, 8.0);
 }
 
-TEST_F(SquareTest, GetCenter) {
-  Point<int> center = sq1.GetCenter();
-  EXPECT_EQ(center.x, 1);
-  EXPECT_EQ(center.y, 1);
+TEST_F(RhombusTest, GetCenter) {
+  Point<int> center = rh1.GetCenter();
+  EXPECT_EQ(center.x, 0);
+  EXPECT_EQ(center.y, 0);
 }
 
-TEST_F(SquareTest, EqualityOperator) {
-  EXPECT_EQ(sq1, sq2);
-  EXPECT_NE(sq1, sq3);
+TEST_F(RhombusTest, EqualityOperator) {
+  EXPECT_EQ(rh1, rh2);
+  EXPECT_NE(rh1, rh3);
 }
 
-TEST_F(SquareTest, MoveSemantics) {
-  Square<int> original = sq1;
-  Square<int> moved = std::move(original);
-  EXPECT_EQ(moved, sq2);
+TEST_F(RhombusTest, MoveSemantics) {
+  Rhombus<int> original = rh1;
+  Rhombus<int> moved = std::move(original);
+  EXPECT_EQ(moved, rh2);
 }
 
-TEST(SquareEdgeCases, UnitSquare) {
-  Square<int> unit{Point<int>(0, 0), Point<int>(1, 0), Point<int>(1, 1), Point<int>(0, 1)};
-  EXPECT_DOUBLE_EQ(static_cast<double>(unit), 1.0);
+TEST(RhombusEdgeCases, UnitRhombus) {
+  Rhombus<int> unit{Point<int>(0, 1), Point<int>(1, 0), Point<int>(0, -1), Point<int>(-1, 0)};
+  EXPECT_DOUBLE_EQ(static_cast<double>(unit), 2.0);
 }
 
-TEST(SquareEdgeCases, LargeSquare) {
-  Square<int> large{Point<int>(0, 0), Point<int>(1000, 0), Point<int>(1000, 1000),
-                    Point<int>(0, 1000)};
-  EXPECT_DOUBLE_EQ(static_cast<double>(large), 1000000.0);
+TEST(RhombusEdgeCases, LargeRhombus) {
+  Rhombus<int> large{Point<int>(0, 1000), Point<int>(1000, 0), Point<int>(0, -1000),
+                     Point<int>(-1000, 0)};
+  EXPECT_DOUBLE_EQ(static_cast<double>(large), 2000000.0);
 }
 
 class RectangleTest : public ::testing::Test {
@@ -172,13 +173,13 @@ TEST_F(TrapezoidTest, EqualityOperator) {
 
 class ArrayTest : public ::testing::Test {
  protected:
-  FigureArray<Square<int>> arr;
+  FigureArray<Rhombus<int>> arr;
 
   void SetUp() override {
     arr.PushBack(
-        Square<int>(Point<int>(0, 0), Point<int>(2, 0), Point<int>(2, 2), Point<int>(0, 2)));
+        Rhombus<int>(Point<int>(0, 2), Point<int>(2, 0), Point<int>(0, -2), Point<int>(-2, 0)));
     arr.PushBack(
-        Square<int>(Point<int>(1, 1), Point<int>(3, 1), Point<int>(3, 3), Point<int>(1, 3)));
+        Rhombus<int>(Point<int>(1, 3), Point<int>(3, 1), Point<int>(1, -1), Point<int>(-1, 1)));
   }
 };
 
@@ -188,30 +189,31 @@ TEST_F(ArrayTest, Size) {
 
 TEST_F(ArrayTest, Empty) {
   EXPECT_FALSE(arr.Empty());
-  FigureArray<Square<int>> empty_arr;
+  FigureArray<Rhombus<int>> empty_arr;
   EXPECT_TRUE(empty_arr.Empty());
 }
 
 TEST_F(ArrayTest, PushBack) {
-  arr.PushBack(Square<int>(Point<int>(0, 0), Point<int>(1, 0), Point<int>(1, 1), Point<int>(0, 1)));
+  arr.PushBack(
+      Rhombus<int>(Point<int>(0, 1), Point<int>(1, 0), Point<int>(0, -1), Point<int>(-1, 0)));
   EXPECT_EQ(arr.Size(), 3);
 }
 
 TEST_F(ArrayTest, Insert) {
-  arr.Insert(1,
-             Square<int>(Point<int>(5, 5), Point<int>(7, 5), Point<int>(7, 7), Point<int>(5, 7)));
+  arr.Insert(
+      1, Rhombus<int>(Point<int>(0, 5), Point<int>(5, 0), Point<int>(0, -5), Point<int>(-5, 0)));
   EXPECT_EQ(arr.Size(), 3);
 }
 
 TEST_F(ArrayTest, InsertAtBeginning) {
-  arr.Insert(0, Square<int>(Point<int>(10, 10), Point<int>(12, 10), Point<int>(12, 12),
-                            Point<int>(10, 12)));
+  arr.Insert(0, Rhombus<int>(Point<int>(0, 10), Point<int>(10, 0), Point<int>(0, -10),
+                             Point<int>(-10, 0)));
   EXPECT_EQ(arr.Size(), 3);
 }
 
 TEST_F(ArrayTest, InsertAtEnd) {
-  arr.Insert(arr.Size(), Square<int>(Point<int>(10, 10), Point<int>(12, 10), Point<int>(12, 12),
-                                     Point<int>(10, 12)));
+  arr.Insert(arr.Size(), Rhombus<int>(Point<int>(0, 10), Point<int>(10, 0), Point<int>(0, -10),
+                                      Point<int>(-10, 0)));
   EXPECT_EQ(arr.Size(), 3);
 }
 
@@ -229,7 +231,7 @@ TEST_F(ArrayTest, Clear) {
 TEST_F(ArrayTest, GetTotalArea) {
   double total = arr.GetTotalArea();
   EXPECT_GT(total, 0.0);
-  EXPECT_DOUBLE_EQ(total, 8.0);
+  EXPECT_DOUBLE_EQ(total, 16.0);
 }
 
 TEST_F(ArrayTest, Reserve) {
@@ -238,92 +240,91 @@ TEST_F(ArrayTest, Reserve) {
 }
 
 TEST_F(ArrayTest, MoveConstructor) {
-  FigureArray<Square<int>> arr_copy = std::move(arr);
+  FigureArray<Rhombus<int>> arr_copy = std::move(arr);
   EXPECT_EQ(arr_copy.Size(), 2);
   EXPECT_TRUE(arr.Empty());
 }
 
 TEST_F(ArrayTest, MoveAssignment) {
-  FigureArray<Square<int>> arr2;
+  FigureArray<Rhombus<int>> arr2;
   arr2.PushBack(
-      Square<int>(Point<int>(0, 0), Point<int>(1, 0), Point<int>(1, 1), Point<int>(0, 1)));
+      Rhombus<int>(Point<int>(0, 1), Point<int>(1, 0), Point<int>(0, -1), Point<int>(-1, 0)));
   arr2 = std::move(arr);
   EXPECT_EQ(arr2.Size(), 2);
 }
 
 TEST(ArrayEdgeCases, EmptyArrayArea) {
-  FigureArray<Square<int>> empty_arr;
+  FigureArray<Rhombus<int>> empty_arr;
   EXPECT_DOUBLE_EQ(empty_arr.GetTotalArea(), 0.0);
 }
 
 TEST(ArrayEdgeCases, SingleElement) {
-  FigureArray<Square<int>> arr;
-  arr.PushBack(Square<int>(Point<int>(0, 0), Point<int>(5, 0), Point<int>(5, 5), Point<int>(0, 5)));
+  FigureArray<Rhombus<int>> arr;
+  arr.PushBack(
+      Rhombus<int>(Point<int>(0, 5), Point<int>(5, 0), Point<int>(0, -5), Point<int>(-5, 0)));
   EXPECT_EQ(arr.Size(), 1);
-  EXPECT_DOUBLE_EQ(arr.GetTotalArea(), 25.0);
+  EXPECT_DOUBLE_EQ(arr.GetTotalArea(), 50.0);
 }
 
 TEST(ArrayEdgeCases, ManyElements) {
-  FigureArray<Square<int>> arr;
+  FigureArray<Rhombus<int>> arr;
   for (int i = 0; i < 100; ++i) {
     arr.PushBack(
-        Square<int>(Point<int>(0, 0), Point<int>(1, 0), Point<int>(1, 1), Point<int>(0, 1)));
+        Rhombus<int>(Point<int>(0, 1), Point<int>(1, 0), Point<int>(0, -1), Point<int>(-1, 0)));
   }
   EXPECT_EQ(arr.Size(), 100);
-  EXPECT_DOUBLE_EQ(arr.GetTotalArea(), 100.0);
+  EXPECT_DOUBLE_EQ(arr.GetTotalArea(), 200.0);
 }
 
 TEST(ArrayEdgeCases, OutOfBounds) {
-  FigureArray<Square<int>> arr;
-  arr.PushBack(Square<int>(Point<int>(0, 0), Point<int>(1, 0), Point<int>(1, 1), Point<int>(0, 1)));
-
+  FigureArray<Rhombus<int>> arr;
+  arr.PushBack(
+      Rhombus<int>(Point<int>(0, 1), Point<int>(1, 0), Point<int>(0, -1), Point<int>(-1, 0)));
   EXPECT_THROW(arr[10], std::out_of_range);
   EXPECT_THROW(arr.Erase(10), std::out_of_range);
-  EXPECT_THROW(arr.Insert(100, Square<int>()), std::out_of_range);
+  EXPECT_THROW(arr.Insert(100, Rhombus<int>()), std::out_of_range);
 }
 
 TEST(ArrayEdgeCases, InsertAtWrongPosition) {
-  FigureArray<Square<int>> arr;
-  EXPECT_THROW(arr.Insert(5, Square<int>()), std::out_of_range);
+  FigureArray<Rhombus<int>> arr;
+  EXPECT_THROW(arr.Insert(5, Rhombus<int>()), std::out_of_range);
 }
 
 TEST(Integration, MixedFigures) {
-  FigureArray<Square<int>> squares;
-  squares.PushBack(
-      Square<int>(Point<int>(0, 0), Point<int>(2, 0), Point<int>(2, 2), Point<int>(0, 2)));
-
-  EXPECT_EQ(squares.Size(), 1);
-  EXPECT_DOUBLE_EQ(static_cast<double>(squares[0]), 4.0);
+  FigureArray<Rhombus<int>> rhombuses;
+  rhombuses.PushBack(
+      Rhombus<int>(Point<int>(0, 2), Point<int>(2, 0), Point<int>(0, -2), Point<int>(-2, 0)));
+  EXPECT_EQ(rhombuses.Size(), 1);
+  EXPECT_DOUBLE_EQ(static_cast<double>(rhombuses[0]), 8.0);
 }
 
 TEST(Integration, SequentialOperations) {
-  FigureArray<Square<int>> arr;
-
-  arr.PushBack(Square<int>(Point<int>(0, 0), Point<int>(1, 0), Point<int>(1, 1), Point<int>(0, 1)));
+  FigureArray<Rhombus<int>> arr;
+  arr.PushBack(
+      Rhombus<int>(Point<int>(0, 1), Point<int>(1, 0), Point<int>(0, -1), Point<int>(-1, 0)));
   EXPECT_EQ(arr.Size(), 1);
 
-  arr.Insert(0,
-             Square<int>(Point<int>(0, 0), Point<int>(2, 0), Point<int>(2, 2), Point<int>(0, 2)));
+  arr.Insert(
+      0, Rhombus<int>(Point<int>(0, 2), Point<int>(2, 0), Point<int>(0, -2), Point<int>(-2, 0)));
   EXPECT_EQ(arr.Size(), 2);
 
   arr.Erase(0);
   EXPECT_EQ(arr.Size(), 1);
-  EXPECT_DOUBLE_EQ(arr.GetTotalArea(), 1.0);
+  EXPECT_DOUBLE_EQ(arr.GetTotalArea(), 2.0);
 }
 
 TEST(Integration, AllFiguresHaveValidGeometry) {
-  FigureArray<Square<int>> arr;
-
+  FigureArray<Rhombus<int>> arr;
   for (int i = 0; i < 3; ++i) {
-    arr.PushBack(Square<int>(Point<int>(0, 0), Point<int>(i + 1, 0), Point<int>(i + 1, i + 1),
-                             Point<int>(0, i + 1)));
+    int d = i + 1;
+    arr.PushBack(
+        Rhombus<int>(Point<int>(0, d), Point<int>(d, 0), Point<int>(0, -d), Point<int>(-d, 0)));
   }
 
   for (size_t i = 0; i < arr.Size(); ++i) {
     Point<int> center = arr[i].GetCenter();
     EXPECT_TRUE(std::isfinite(static_cast<double>(center.x)));
     EXPECT_TRUE(std::isfinite(static_cast<double>(center.y)));
-
     double area = static_cast<double>(arr[i]);
     EXPECT_GT(area, 0.0);
   }
