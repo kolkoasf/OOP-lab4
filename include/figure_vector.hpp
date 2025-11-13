@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <concepts>
@@ -33,11 +32,13 @@ class FigureArray {
 
   T& operator[](size_t index);
   const T& operator[](size_t index) const;
+
   bool operator==(const FigureArray& other) const;
   bool operator!=(const FigureArray& other) const;
 
   void Clear();
   void Reserve(size_t new_capacity);
+
   double GetTotalArea() const requires HasArea<T>;
   void PrintAll(std::ostream& os) const;
 
@@ -49,7 +50,7 @@ class FigureArray {
 
   size_t sz_;
   size_t capacity_;
-  std::shared_ptr<T[]> data_;
+  T* data_;
 };
 
 }  // namespace geometry

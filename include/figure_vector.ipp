@@ -11,27 +11,32 @@ FigureArray<T>::FigureArray() : sz_(0), capacity_(0), data_(nullptr) {
 
 template <typename T>
 FigureArray<T>::FigureArray(FigureArray&& other) noexcept
-    : sz_(other.sz_), capacity_(other.capacity_), data_(std::move(other.data_)) {
+    : sz_(other.sz_), capacity_(other.capacity_), data_(other.data_) {
   other.sz_ = 0;
   other.capacity_ = 0;
+  other.data_ = nullptr;
 }
 
 template <typename T>
 FigureArray<T>& FigureArray<T>::operator=(FigureArray&& other) noexcept {
   if (this != &other) {
-    data_.reset();
+    delete[] data_;
+    data_ = nullptr;
     sz_ = other.sz_;
     capacity_ = other.capacity_;
-    data_ = std::move(other.data_);
+    data_ = other.data_;
+
     other.sz_ = 0;
     other.capacity_ = 0;
+    other.data_ = nullptr;
   }
   return *this;
 }
 
 template <typename T>
 FigureArray<T>::~FigureArray() {
-  data_.reset();
+  delete[] data_;
+  data_ = nullptr;
   capacity_ = 0;
 }
 
@@ -161,12 +166,13 @@ void FigureArray<T>::Reserve(size_t new_capacity) {
     return;
   }
 
-  std::shared_ptr<T[]> new_data(new T[new_capacity]);
+  T* new_data = new T[new_capacity];
 
   for (size_t i = 0; i < sz_; ++i) {
     new_data[i] = std::move(data_[i]);
   }
 
+  delete[] data_;
   data_ = new_data;
   capacity_ = new_capacity;
 }
